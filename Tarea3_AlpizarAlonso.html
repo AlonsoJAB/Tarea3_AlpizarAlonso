@@ -2237,7 +2237,11 @@ vertical-align: -.125em;
 <div class="cell-output cell-output-stdout">
 <pre><code>RESULTADO_1A = 22
 RESULTADO_1B = 2025-01-26
-RESULTADO_1C = 23</code></pre>
+RESULTADO_1C = 23
+RESULTADO_2A = 0.0032
+RESULTADO_2B = Hojancha
+RESULTADO_2C = 1
+RESULTADO_2D = Guácimo</code></pre>
 </div>
 </div>
 </section>
@@ -2287,6 +2291,27 @@ RESULTADO_1C = 23</code></pre>
 </div>
 </div>
 </div>
+</section>
+<section id="ejercicio-2-ley-de-benford-por-cantón" class="level2">
+<h2 class="anchored" data-anchor-id="ejercicio-2-ley-de-benford-por-cantón">Ejercicio 2 · Ley de Benford por cantón</h2>
+<p>En el canal <strong>SINPE Móvil</strong>, la MAD de todos los cantones juntos es <strong>0.0032</strong>. El cantón con la mayor MAD es <strong>Hojancha</strong>, y <strong>1</strong> cantón(es) quedan en <em>no conformidad</em> (MAD &gt; 0,015). En el canal Web, el cantón con la mayor MAD es <strong>Guácimo</strong>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(r2, <span class="dv">10</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   cod_canton        canton    n         mad                 clase
+1         511      Hojancha  426 0.017198877        no conformidad
+2         106        Aserrí  473 0.013250216  conformidad marginal
+3         609       Parrita 1072 0.012134492  conformidad marginal
+4         604 Montes De Oro  948 0.011662652 conformidad aceptable
+5         706       Guácimo  528 0.011597245 conformidad aceptable
+6         701         Limón 1289 0.010687170 conformidad aceptable
+7         506         Cañas  825 0.009541873 conformidad aceptable
+8         202     San Ramón 2264 0.009344574 conformidad aceptable
+9         305     Turrialba 1243 0.009306668 conformidad aceptable
+10        302       Paraíso 1096 0.009248657 conformidad aceptable</code></pre>
+</div>
+</div>
+<p><strong>Conclusión:</strong> los cantones con la MAD más alta son los que tienen menos transacciones (columna <code>n</code>). Con pocos montos, la proporción de cada dígito varía mucho por azar, así que la desviación se explica por el tamaño de la muestra y no por fraude.</p>
 </section>
 
 </main>

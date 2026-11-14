@@ -48,3 +48,71 @@ alerta.movil <- function(df, ventana, k.alerta) {
   
   diario
 }
+
+# ------------------------------------------------------------
+#  Ejercicio 2 · Ley de Benford por cantón
+# ------------------------------------------------------------
+#  benford.mad(x)
+#
+#  Recibe:
+#    x  vector de montos (positivos)
+#
+#  Devuelve:
+#    la MAD (desviación absoluta media) entre la proporción
+#    observada de cada primer dígito y la proporción de Benford.
+# ------------------------------------------------------------
+
+benford.mad <- function(x) {
+
+  # 1. Primer dígito de cada monto
+  x <- x[!is.na(x) & x > 0]
+  d <- x %/% 10^floor(log10(x))
+
+  # 2. Proporción observada de cada dígito (1 a 9)
+  p <- as.numeric(table(factor(d, levels = 1:9))) / length(x)
+
+  # 3. Proporción teórica de Benford
+  b <- log10(1 + 1 / (1:9))
+
+  # 4. MAD
+  sum(abs(p - b)) / 9
+}
+
+
+# ------------------------------------------------------------
+#  benford.canton(df, canal, cantones)
+#
+#  Recibe:
+#    df        data frame de transacciones (cod_canton, canal, monto_crc)
+#    canal     canal a auditar (por ejemplo "Web")
+#    cantones  catálogo con cod_canton y canton
+#
+#  Devuelve:
+#    data frame por cantón con cod_canton, canton, n, mad y clase
+#    (Nigrini), ordenado de mayor a menor MAD.
+# ------------------------------------------------------------
+
+benford.canton <- function(df, canal, cantones) {
+
+  # 1. Solo las transacciones del canal pedido
+  sub <- df[df$canal == canal, ]
+
+  # 2. MAD por cantón (usa benford.mad)
+  sub |>
+    group_by(cod_canton) |>
+    summarise(n = n(), mad = benford.mad(monto_crc)) |>
+
+    # 3. Nombre del cantón y clase de Nigrini
+    left_join(select(cantones, cod_canton, canton), by = "cod_canton") |>
+    mutate(clase = case_when(
+      mad <= 0.006 ~ "conformidad cercana",
+      mad <= 0.012 ~ "conformidad aceptable",
+      mad <= 0.015 ~ "conformidad marginal",
+      TRUE         ~ "no conformidad"
+    )) |>
+
+    # 4. Orden y columnas finales
+    arrange(desc(mad)) |>
+    select(cod_canton, canton, n, mad, clase) |>
+    as.data.frame()
+}

@@ -164,3 +164,30 @@ efectiva anual de `r tasa.anual`, equivalente a una tasa mensual de
 #| label: ej3-tabla
 r3$tabla
 ```
+
+```{r}
+#| label: ej3-grafico
+#| fig-width: 9
+#| fig-height: 5
+tabla.ej3 <- r3$tabla |>
+  mutate(acumulado = monto * factor) |>
+  select(mes, monto, acumulado) |>
+  pivot_longer(c(monto, acumulado), names_to = "tipo", values_to = "valor") |>
+  mutate(tipo = factor(tipo, levels = c("monto", "acumulado"),
+                       labels = c("Monto depositado", "Valor al 31-dic")))
+
+g3 <- ggplot(tabla.ej3, aes(x = factor(mes), y = valor / 1e6, fill = tipo)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("grey70", "#C0392B")) +
+  labs(
+    title    = paste0("Los depósitos de ", canal.interes, " ganan ₡",
+                      format(round(res.3b / 1e6, 1), nsmall = 1), " millones de interés en el año"),
+    subtitle = "Cada mes, lo depositado y lo que vale al 31 de diciembre. Enero gana más porque acumula 11 meses.",
+    x = "Mes", y = "Millones de colones", fill = NULL
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title.position = "plot", legend.position = "top")
+
+ggsave("info/figuras/ej3_valor_acumulado.png", g3, width = 9, height = 5, dpi = 150)
+g3
+```

@@ -28,6 +28,16 @@ r1c <- alerta.movil(tx, 7, 2)
 res.1a <- sum(r1$alerta, na.rm = TRUE)
 res.1b <- r1$fecha[which(r1$alerta)[1]]
 res.1c <- sum(r1c$alerta, na.rm = TRUE)
+
+# Ejercicio 2
+canal.benford <- par["canal.benford"]
+cantones <- read.csv("data/cantones.csv", encoding = "UTF-8")
+r2  <- benford.canton(tx, canal.benford, cantones)
+r2w <- benford.canton(tx, "Web", cantones)
+res.2a <- benford.mad(tx$monto_crc[tx$canal == canal.benford])
+res.2b <- r2$canton[1]
+res.2c <- sum(r2$mad > 0.015)
+res.2d <- r2w$canton[1]
 ```
 
 ## Hoja de respuestas
@@ -39,6 +49,10 @@ cat(
   paste0("RESULTADO_1A = ", res.1a),
   paste0("RESULTADO_1B = ", format(res.1b)),
   paste0("RESULTADO_1C = ", res.1c),
+  paste0("RESULTADO_2A = ", sprintf("%.4f", res.2a)),
+  paste0("RESULTADO_2B = ", res.2b),
+  paste0("RESULTADO_2C = ", res.2c),
+  paste0("RESULTADO_2D = ", res.2d),
   sep = "\n"
 )
 ```
@@ -75,4 +89,53 @@ g1 <- r1 |>
 
 ggsave("info/figuras/ej1_alertas.png", g1, width = 9, height = 5, dpi = 150)
 g1
+```
+
+## Ejercicio 2 · Ley de Benford por cantón
+
+En el canal **`r canal.benford`**, la MAD de todos los cantones juntos es
+**`r sprintf("%.4f", res.2a)`**. El cantón con la mayor MAD es **`r res.2b`**, y
+**`r res.2c`** cantón(es) quedan en *no conformidad* (MAD > 0,015).
+En el canal Web, el cantón con la mayor MAD es **`r res.2d`**.
+
+```{r}
+#| label: ej2-tabla
+head(r2, 10)
+```
+
+**Conclusión:** los cantones con la MAD más alta son los que tienen menos
+transacciones (columna `n`). Con pocos montos, la proporción de cada dígito
+varía mucho por azar, así que la desviación se explica por el tamaño de la
+muestra y no por fraude.
+
+```{r}
+#| label: ej2-grafico
+#| fig-width: 9
+#| fig-height: 5
+monto.canal <- tx$monto_crc[tx$canal == canal.benford]
+digito      <- monto.canal %/% 10^floor(log10(monto.canal))
+
+tabla.benford <- data.frame(
+  digito    = 1:9,
+  observada = as.numeric(table(factor(digito, levels = 1:9))) / length(digito),
+  benford   = log10(1 + 1 / (1:9))
+)
+
+g2 <- ggplot(tabla.benford, aes(x = digito)) +
+  geom_col(aes(y = observada), fill = "grey70") +
+  geom_line(aes(y = benford), color = "#C0392B", linewidth = 1) +
+  geom_point(aes(y = benford), color = "#C0392B", size = 2.5) +
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title    = paste0("En ", canal.benford, " el primer dígito sigue la ley de Benford (MAD = ",
+                      sprintf("%.4f", res.2a), ")"),
+    subtitle = "Barras: proporción observada de cada primer dígito. Línea roja: proporción esperada según Benford.",
+    x = "Primer dígito", y = "Proporción de montos"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title.position = "plot")
+
+ggsave("info/figuras/ej2_benford.png", g2, width = 9, height = 5, dpi = 150)
+g2
 ```

@@ -52,3 +52,27 @@ La primera fue el **`r format(res.1b)`**.
 #| label: ej1-tabla
 r1 |> filter(alerta) |> head(10)
 ```
+
+```{r}
+#| label: ej1-grafico
+#| fig-width: 9
+#| fig-height: 5
+g1 <- r1 |>
+  mutate(limite = media + k.alerta * desv) |>
+  ggplot(aes(x = fecha)) +
+  geom_line(aes(y = n.tx), color = "grey60") +
+  geom_line(aes(y = limite), color = "grey30", linetype = "dashed", na.rm = TRUE) +
+  geom_point(data = filter(r1, alerta), aes(y = n.tx),
+             color = "#C0392B", size = 2.5) +
+  labs(
+    title    = paste0(res.1a, " días de 2025 superaron el límite de alerta"),
+    subtitle = paste0("Transacciones por día. Línea punteada: media + ", k.alerta,
+                      " desv. de los ", ventana, " días anteriores. En rojo: alertas."),
+    x = NULL, y = "Transacciones por día"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title.position = "plot")
+
+ggsave("info/figuras/ej1_alertas.png", g1, width = 9, height = 5, dpi = 150)
+g1
+```

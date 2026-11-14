@@ -1,0 +1,54 @@
+---
+title: "Tarea 3 · Proyecto R + Git + Excel"
+author: "Alonso Alpízar Brenes · C20274"
+format:
+  html:
+    embed-resources: true
+lang: es
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+source("cod/funciones_tarea3.R")
+
+# Parámetros (salen del carné)
+p   <- read.csv("config/parametros_tarea3.csv", sep = ";", encoding = "UTF-8")
+par <- setNames(p$valor, p$parametro)
+ventana  <- as.numeric(par["ventana"])
+k.alerta <- as.numeric(par["k.alerta"])
+
+# Datos
+tx <- read.csv("data/transacciones_2025.csv", sep = ";", encoding = "UTF-8")
+
+# Ejercicio 1
+r1  <- alerta.movil(tx, ventana, k.alerta)
+r1c <- alerta.movil(tx, 7, 2)
+res.1a <- sum(r1$alerta, na.rm = TRUE)
+res.1b <- r1$fecha[which(r1$alerta)[1]]
+res.1c <- sum(r1c$alerta, na.rm = TRUE)
+```
+
+## Hoja de respuestas
+
+```{r}
+#| label: respuestas
+#| echo: false
+cat(
+  paste0("RESULTADO_1A = ", res.1a),
+  paste0("RESULTADO_1B = ", format(res.1b)),
+  paste0("RESULTADO_1C = ", res.1c),
+  sep = "\n"
+)
+```
+
+## Ejercicio 1 · Alertas por ventana móvil
+
+Con ventana = `r ventana` y k = `r k.alerta`, hubo **`r res.1a` días con alerta**.
+La primera fue el **`r format(res.1b)`**.
+
+```{r}
+#| label: ej1-tabla
+r1 |> filter(alerta) |> head(10)
+```

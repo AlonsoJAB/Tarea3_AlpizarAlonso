@@ -116,3 +116,50 @@ benford.canton <- function(df, canal, cantones) {
     select(cod_canton, canton, n, mad, clase) |>
     as.data.frame()
 }
+
+
+# ------------------------------------------------------------
+#  Ejercicio 3 · Valor acumulado con interés
+# ------------------------------------------------------------
+#  valor.acumulado(df, tasa.anual, canal)
+#
+#  Recibe:
+#    df          data frame de transacciones (fecha, canal, monto_crc)
+#    tasa.anual  tasa efectiva anual en decimal (0.06 = 6 %)
+#    canal       canal cuyos montos se depositan al cierre de cada mes
+#
+#  Devuelve:
+#    lista con
+#      tabla         data frame con mes, monto y factor (1 + i_m)^(12 - m)
+#      tasa.mensual  tasa efectiva mensual equivalente i_m
+#      va            valor acumulado al 31 de diciembre
+#      interes       intereses ganados = va - suma de montos
+# ------------------------------------------------------------
+
+valor.acumulado <- function(df, tasa.anual, canal) {
+
+  # 1. Tasa mensual equivalente: aplicada 12 veces da lo mismo que la anual
+  tasa.mensual <- (1 + tasa.anual)^(1 / 12) - 1
+
+  # 2. Monto total del canal en cada mes
+  sub <- df[df$canal == canal, ]
+  tabla <- sub |>
+    mutate(mes = as.numeric(format(as.Date(fecha), "%m"))) |>
+    group_by(mes) |>
+    summarise(monto = sum(monto_crc)) |>
+    arrange(mes) |>
+
+    # 3. Factor: cada depósito gana interés los meses que faltan hasta diciembre
+    mutate(factor = (1 + tasa.mensual)^(12 - mes)) |>
+    as.data.frame()
+
+  # 4. Valor acumulado e intereses
+  va <- sum(tabla$monto * tabla$factor)
+
+  list(
+    tabla        = tabla,
+    tasa.mensual = tasa.mensual,
+    va           = va,
+    interes      = va - sum(tabla$monto)
+  )
+}

@@ -2,3 +2,13 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# Mac
+.DS_Store
+
+# Clon del docente
+base/
+
+# Datos generados (pesados)
+data/*
+!data/README.md

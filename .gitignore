@@ -12,3 +12,6 @@ base/
 # Datos generados (pesados)
 data/*
 !data/README.md
+
+# Archivos temporales de Office
+~$*

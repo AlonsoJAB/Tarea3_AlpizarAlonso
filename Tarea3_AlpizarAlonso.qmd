@@ -107,3 +107,35 @@ head(r2, 10)
 transacciones (columna `n`). Con pocos montos, la proporción de cada dígito
 varía mucho por azar, así que la desviación se explica por el tamaño de la
 muestra y no por fraude.
+
+```{r}
+#| label: ej2-grafico
+#| fig-width: 9
+#| fig-height: 5
+monto.canal <- tx$monto_crc[tx$canal == canal.benford]
+digito      <- monto.canal %/% 10^floor(log10(monto.canal))
+
+tabla.benford <- data.frame(
+  digito    = 1:9,
+  observada = as.numeric(table(factor(digito, levels = 1:9))) / length(digito),
+  benford   = log10(1 + 1 / (1:9))
+)
+
+g2 <- ggplot(tabla.benford, aes(x = digito)) +
+  geom_col(aes(y = observada), fill = "grey70") +
+  geom_line(aes(y = benford), color = "#C0392B", linewidth = 1) +
+  geom_point(aes(y = benford), color = "#C0392B", size = 2.5) +
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title    = paste0("En ", canal.benford, " el primer dígito sigue la ley de Benford (MAD = ",
+                      sprintf("%.4f", res.2a), ")"),
+    subtitle = "Barras: proporción observada de cada primer dígito. Línea roja: proporción esperada según Benford.",
+    x = "Primer dígito", y = "Proporción de montos"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(plot.title.position = "plot")
+
+ggsave("info/figuras/ej2_benford.png", g2, width = 9, height = 5, dpi = 150)
+g2
+```
